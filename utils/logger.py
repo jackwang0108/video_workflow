@@ -1,5 +1,5 @@
 """
-logger.py - 项目的日志输出
+logger.py 提供了 项目的日志输出工具
 
     @Time    : 2025/01/09
     @Author  : JackWang

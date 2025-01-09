@@ -1,5 +1,5 @@
 """
-工具函数
+helper.py 提供了一系列工具函数
 
     @Time    : 2025/01/09
     @Author  : JackWang
@@ -14,12 +14,7 @@ import quopri
 from typing import Any
 from pathlib import Path
 
-# Third-Party Library
 
-# Torch Library
-
-
-# My Library
 def read_json(json_path: Path) -> dict[str, Any]:
     """读取指定路径的 JSON 文件并将其内容解析为字典。验证文件存在后再进行读取操作。
 
