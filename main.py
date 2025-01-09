@@ -8,6 +8,7 @@ main.py 程序入口
 """
 
 # Standard Library
+import time
 import datetime
 import threading
 from queue import Queue
@@ -19,6 +20,7 @@ from worker import abort_all_thread
 
 # My Library
 from utils.logger import get_logger
+from src.types import Task
 from src.watcher import Watcher
 from src.pipeline import Pipeline
 from src.dispatcher import Dispatcher
@@ -26,42 +28,49 @@ from src.dispatcher import Dispatcher
 
 def print_data(data):
     print(data)
-    return data
+    return {"status": "success"}
+
+
+def setup_logger(log_dir: Path = Path(__file__).resolve().parent / "logs"):
+    log_dir.mkdir(exist_ok=True, parents=True)
+    log_file = (
+        log_dir / f"running-{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
+    )
+
+    return log_dir, get_logger(log_file)
 
 
 def main():
-    log_dir = (
-        Path(__file__).resolve().parent
-        / f"logs/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
-    )
-    log_dir.mkdir(exist_ok=True, parents=True)
+    log_dir, logger = setup_logger()
 
-    logger = get_logger(log_file=log_dir / "running.log")
     logger.info("程序启动")
+    task_queue: Queue[Task] = Queue()
 
-    task_queue = Queue()
-    watcher = Watcher(log_dir=log_dir)
-    dispatcher = Dispatcher(queue=task_queue)
+    cache_file = log_dir / "cache.json"
+    watcher = Watcher(cache_file=cache_file)
+    dispatcher = Dispatcher(cache_file=cache_file)
 
-    threading.Thread(target=watcher.watch, args=(task_queue,)).start()
-    threading.Thread(target=dispatcher.dispatch).start()
+    close_event = threading.Event()
 
-    watcher_thread = threading.Thread(target=watcher.watch, args=(task_queue,))
-    dispatcher_thread = threading.Thread(target=dispatcher.dispatch)
-
-    watcher_thread.name = "Watcher"
-    watcher_thread.start()
-
-    dispatcher_thread.name = "Dispatcher"
-    dispatcher_thread.start()
+    threads = [
+        threading.Thread(
+            target=watcher.watch,
+            args=(close_event, task_queue),
+        ),
+        threading.Thread(
+            target=dispatcher.dispatch,
+            args=(close_event, task_queue, Pipeline().add_step(print_data)),
+        ),
+    ]
 
     try:
-        watcher_thread.join()
-        dispatcher_thread.join()
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
     except KeyboardInterrupt:
+        close_event.set()
         logger.info("程序退出")
-        abort_all_thread()
-        exit(0)
 
 
 if __name__ == "__main__":
