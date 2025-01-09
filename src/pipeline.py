@@ -8,19 +8,24 @@ pipeline.py定义了一个Pipeline类，用于将多个函数串联起来，形�
 """
 
 # Standard Library
-from typing import Any
+from typing import Any, Optional
 from collections.abc import Callable
 
 
 class Pipeline:
-    def __init__(self):
-        self.steps: list[Callable] = []
+    def __init__(self, pipes: Optional[list[Callable]] = None):
+        if pipes is None:
+            pipes = []
+        self.pipes: list[Callable] = pipes
 
-    def add_step(self, step: Callable) -> "Pipeline":
-        self.steps.append(step)
+    def add_pipes(self, step: list[Callable] | Callable) -> "Pipeline":
+        if isinstance(step, list):
+            self.pipes.extend(step)
+        elif callable(step):
+            self.pipes.append(step)
         return self
 
     def execute(self, data: Any) -> Any:
-        for step in self.steps:
-            data = step(data)
+        for pipe in self.pipes:
+            data = pipe(data)
         return data

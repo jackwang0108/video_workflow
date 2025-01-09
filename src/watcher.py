@@ -23,8 +23,9 @@ import bypy
 from loguru import logger
 
 # My Library
-from .types import Task
 from .common import filelock, get_thread_id
+
+from utils.helper import Task
 
 
 class Watcher:
