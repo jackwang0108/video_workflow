@@ -20,10 +20,14 @@ from worker import abort_all_thread
 
 # My Library
 from utils.logger import get_logger
-from src.types import Task
+from utils.helper import Task
 from src.watcher import Watcher
 from src.pipeline import Pipeline
 from src.dispatcher import Dispatcher
+
+from workflows.bypy_download import download_dir
+from workflows.create_product import create_product
+from workflows.process_videos import process_video
 
 
 def print_data(data):
@@ -43,7 +47,6 @@ def setup_logger(log_dir: Path = Path(__file__).resolve().parent / "logs"):
 def main():
     log_dir, logger = setup_logger()
 
-    logger.info("程序启动")
     task_queue: Queue[Task] = Queue()
 
     cache_file = log_dir / "cache.json"
@@ -52,6 +55,8 @@ def main():
 
     close_event = threading.Event()
 
+    pipeline = Pipeline([create_product, download_dir, process_video])
+
     threads = [
         threading.Thread(
             target=watcher.watch,
@@ -59,7 +64,7 @@ def main():
         ),
         threading.Thread(
             target=dispatcher.dispatch,
-            args=(close_event, task_queue, Pipeline().add_step(print_data)),
+            args=(close_event, task_queue, pipeline),
         ),
     ]
 

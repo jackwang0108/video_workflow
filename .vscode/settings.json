@@ -1,8 +1,11 @@
 {
     "cSpell.words": [
+        "audiofile",
         "bypy",
         "libc",
         "printlock",
-        "syscall"
+        "subclipped",
+        "syscall",
+        "videofile"
     ]
 }

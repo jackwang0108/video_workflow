@@ -9,6 +9,7 @@ logger.py 提供了 项目的日志输出工具
 
 # Standard Library
 import sys
+import threading
 from pathlib import Path
 
 # Third-Party Library
@@ -34,21 +35,21 @@ def get_logger(log_file: Path, with_time: bool = True):
     logger.add(
         sys.stderr,
         level="DEBUG",
-        format=f"{'<green>{time:YYYY-D-MMMM@HH:mm:ss}</green>' if with_time else ''}│ <fg #ec6337><bold>{{module:<10}}</bold></fg #ec6337> │ <level>{{message}}</level>",
+        format=f"{'<green>{time:YYYY-D-MMMM@HH:mm:ss}</green>' if with_time else ''}│ <fg #ec6337><bold>{{module:<15}}</bold></fg #ec6337> │ <level>{{message}}</level>",
         filter=lambda record: record["module"] == "watcher",
     )
 
     logger.add(
         sys.stderr,
         level="DEBUG",
-        format=f"{'<green>{time:YYYY-D-MMMM@HH:mm:ss}</green>' if with_time else ''}│ <fg #4daab3><bold>{{module:<10}}</bold></fg #4daab3> │ <level>{{message}}</level>",
+        format=f"{'<green>{time:YYYY-D-MMMM@HH:mm:ss}</green>' if with_time else ''}│ <fg #4daab3><bold>{{module:<15}}</bold></fg #4daab3> │ <level>{{message}}</level>",
         filter=lambda record: record["module"] == "dispatcher",
     )
 
     logger.add(
         sys.stderr,
         level="DEBUG",
-        format=f"{'<green>{time:YYYY-D-MMMM@HH:mm:ss}</green>' if with_time else ''}│ {{module:<10}} │ <level>{{message}}</level>",
+        format=f"{'<green>{time:YYYY-D-MMMM@HH:mm:ss}</green>' if with_time else ''}│ <fg #f8e496><bold>{{module:<15}}</bold></fg #f8e496> │ <level>{{message}}</level>",
         filter=lambda record: record["module"] not in ["watcher", "dispatcher"],
     )
 

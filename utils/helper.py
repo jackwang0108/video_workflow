@@ -11,16 +11,45 @@ helper.py 提供了一系列工具函数
 import json
 import base64
 import quopri
-from typing import Any
+import threading
 from pathlib import Path
+from typing import Any, Optional
 
 # Third-Party Library
 from pydantic import BaseModel
+
+filelock = threading.Lock()
 
 
 class Task(BaseModel):
     name: str
     remote_path: Path
+
+    output_dir: Path = Path(__file__).resolve().parent.parent / "data"
+
+
+class Product(BaseModel):
+    class Config:
+        extra = "allow"
+
+    name: str = ""
+    status: str = ""
+    output_dir: Optional[Path] = None
+    remote_path: Optional[Path] = None
+
+    # bypy_download
+    base_dir: Optional[Path] = None
+    mp4_path: Optional[Path] = None
+    filelist: Optional[list[str]] = None
+
+    # process_videos
+    clip_dir: Optional[Path] = None
+    clip_files: Optional[list[Path]] = None
+    audio_files: Optional[list[Path]] = None
+
+
+def get_thread_id() -> int:
+    return threading.get_native_id()
 
 
 def read_json(json_path: Path) -> dict[str, Any]:

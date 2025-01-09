@@ -23,9 +23,9 @@ import bypy
 from loguru import logger
 
 # My Library
-from .common import filelock, get_thread_id
-
 from utils.helper import Task
+from utils.helper import filelock
+from utils.helper import get_thread_id
 
 
 class Watcher:
@@ -35,7 +35,7 @@ class Watcher:
         remote_path: Path = Path("上传视频/待处理"),
     ):
         logger.debug("Watcher 初始化")
-        logger.info(f"开始监控百度网盘路径: {remote_path}")
+        logger.debug(f"开始监控百度网盘路径: {remote_path}")
 
         self.lock: RLock = filelock
         self.cache: list[dict[str, str | bool]] = []
@@ -96,12 +96,12 @@ class Watcher:
 
             # 添加任务到任务队列
             for task in new_tasks:
-                logger.info(f"添加任务: {task.name}")
+                logger.debug(f"添加任务: {task.name}")
                 task_queue.put(task)
 
             # 输出目前正在排队的任务
             if task_queue.qsize() > 0:
-                logger.success(f"当前队列任务数: {task_queue.qsize()}")
+                logger.debug(f"当前队列任务数: {task_queue.qsize()}")
 
             time.sleep(10)
 

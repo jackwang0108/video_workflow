@@ -21,15 +21,16 @@ from loguru import logger
 
 # My Library
 from .pipeline import Pipeline
-from .common import filelock, get_thread_id
 
-from utils.helper import Task
+from utils.helper import filelock
+from utils.helper import get_thread_id
+from utils.helper import Task, Product
 
 
 class Dispatcher:
     def __init__(self, cache_file: Path):
         logger.debug("Dispatcher 初始化")
-        logger.info("开始监控任务队列")
+        logger.debug("开始监控任务队列")
 
         self.lock: RLock = filelock
         self.cache_file = cache_file
@@ -39,11 +40,10 @@ class Dispatcher:
         def handle_task(task: Task):
             tid = get_thread_id()
             logger.success(f"线程 {tid} 开始处理任务: {task.name}")
-            result = copy.deepcopy(pipeline).execute(task)
+            final_product: Product = copy.deepcopy(pipeline).execute(task)
 
-            if result["status"] == "success":
+            if final_product.status == "success":
                 logger.success(f"线程 {tid} 任务处理完成: {task.name}")
-
                 with self.lock:
                     with self.cache_file.open("r", encoding="utf8") as f:
                         last_cache: list[dict[str, str | bool]] = json.load(f)
@@ -56,7 +56,7 @@ class Dispatcher:
 
                     with self.cache_file.open("w", encoding="utf8") as f:
                         json.dump(last_cache, f, ensure_ascii=False)
-            return result
+            return final_product
 
         results = []
         with ThreadPoolExecutor(max_workers=5) as executor:
@@ -65,8 +65,14 @@ class Dispatcher:
                     continue
 
                 task: Task = queue.get()
-                logger.info(f"提交任务到线程池: {task.name}")
+                logger.debug(f"提交任务到线程池: {task.name}")
                 future = executor.submit(handle_task, task)
-                results.append(future.result())
+
+                final_product: Product = future.result()
+                if final_product.status == "success":
+                    results.append(results)
+                else:
+                    logger.warning(f"任务处理失败: {task.name}, 重新添加到任务队列")
+                    queue.put(task)
 
         return results
