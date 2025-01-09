@@ -22,8 +22,7 @@ from loguru import logger
 # My Library
 from .types import Task
 from .pipeline import Pipeline
-from .common import filelock
-from utils.helper import get_thread_id
+from .common import filelock, get_thread_id
 
 
 class Dispatcher:
