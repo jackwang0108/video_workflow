@@ -14,6 +14,14 @@ import quopri
 from typing import Any
 from pathlib import Path
 
+# Third-Party Library
+from pydantic import BaseModel
+
+
+class Task(BaseModel):
+    name: str
+    remote_path: Path
+
 
 def read_json(json_path: Path) -> dict[str, Any]:
     """读取指定路径的 JSON 文件并将其内容解析为字典。验证文件存在后再进行读取操作。

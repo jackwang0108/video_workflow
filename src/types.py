@@ -11,9 +11,3 @@ types.py: 定义项目中使用到的类型。
 from pathlib import Path
 
 # Third-Party Library
-from pydantic import BaseModel
-
-
-class Task(BaseModel):
-    name: str
-    remote_path: Path
