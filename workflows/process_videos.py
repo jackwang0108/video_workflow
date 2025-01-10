@@ -67,15 +67,18 @@ def cut_clips(
     clip_files = []
     for idx, (start, end) in enumerate(zip(times[:-1], times[1:])):
 
-        outfile = clip_dir / f"{filename.stem}-{idx}{filename.suffix}"
+        outfile = clip_dir / f"片段-{idx}" / f"{filename.stem}-{idx}{filename.suffix}"
+        outfile.parent.mkdir(parents=True, exist_ok=True)
 
         logger.success(f"线程 {get_thread_id()} 视频片段: {idx} -> {outfile}")
+
+        clip_files.append(outfile)
+        if outfile.exists():
+            continue
 
         clip: VideoClip = video.subclipped(start, end)
 
         clip.write_videofile(outfile, audio=True, threads=16)
-
-        clip_files.append(outfile)
 
     return clip_files
 
@@ -87,12 +90,14 @@ def extract_audio(clip_files: list[Path]) -> list[Path]:
 
         audio_file = video_file.with_suffix(".mp3")
 
+        audio_files.append(audio_file)
+        if audio_file.exists():
+            continue
+
         logger.success(f"线程 {get_thread_id()} 提取音频文件: {idx} -> {audio_file}")
 
         clip = VideoFileClip(video_file)
         clip.audio.write_audiofile(audio_file)
-
-        audio_files.append(audio_file)
 
     return audio_files
 
