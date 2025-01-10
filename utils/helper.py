@@ -57,6 +57,12 @@ def get_thread_id() -> int:
     return threading.get_native_id()
 
 
+def get_relative_path(
+    path: Path | str, base_path: Path = Path(__file__).resolve().parent.parent
+) -> Path:
+    return Path(path).relative_to(base_path)
+
+
 def get_free_gpu_indices():
 
     def run_cmd(cmd):

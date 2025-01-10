@@ -16,8 +16,8 @@ import bypy
 
 # My Library
 from utils.logger import logger
-from utils.helper import get_thread_id
 from utils.helper import Product
+from utils.helper import get_thread_id, get_relative_path
 
 
 def get_dir_files(remote_path: str):
@@ -35,14 +35,16 @@ def download_dir(product: Product) -> Product:
     base_dir = output_dir / remote_path.parts[-1]
     base_dir.mkdir(exist_ok=True, parents=True)
 
+    mp4_path = None
     for file in (filelist := get_dir_files(remote_path)):
 
-        if file.endswith(".mp4"):
-            mp4_path = base_dir / file
+        if not file.endswith(".mp4"):
+            continue
 
+        mp4_path = base_dir / file
         download_file = f"{base_dir}/{file}"
         logger.success(
-            f"线程 {get_thread_id()} 开始下载文件: {file} -> {download_file}"
+            f"线程 {get_thread_id()} 开始下载文件: {file} -> {get_relative_path(download_file)}"
         )
         subprocess.run(
             ["bypy", "downfile", f"{remote_path}/{file}", download_file],
@@ -50,9 +52,10 @@ def download_dir(product: Product) -> Product:
             text=True,
         )
 
+    product.status = "failed" if mp4_path is None else "downloaded"
+
     product.filelist = filelist
-    product.status = "downloaded"
     product.base_dir = base_dir
-    product.mp4_path = Path(mp4_path)
+    product.mp4_path = mp4_path
 
     return product

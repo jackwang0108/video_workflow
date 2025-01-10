@@ -29,6 +29,7 @@ from workflows.bypy_download import download_dir
 from workflows.create_product import create_product
 from workflows.process_videos import process_video
 from workflows.extract_srt import extract_srt
+from workflows.bypy_upload import upload_dir
 
 
 def print_data(data):
@@ -62,6 +63,7 @@ def main():
             download_dir,
             process_video,
             extract_srt,
+            upload_dir,
         ]
     )
 

@@ -18,7 +18,7 @@ from moviepy import VideoFileClip, VideoClip
 
 
 # My Library
-from utils.helper import Product, get_thread_id
+from utils.helper import Product, get_thread_id, get_relative_path
 
 
 class MyBarLogger(ProgressBarLogger):
@@ -70,7 +70,9 @@ def cut_clips(
         outfile = clip_dir / f"片段-{idx}" / f"{filename.stem}-{idx}{filename.suffix}"
         outfile.parent.mkdir(parents=True, exist_ok=True)
 
-        logger.success(f"线程 {get_thread_id()} 视频片段: {idx} -> {outfile}")
+        logger.success(
+            f"线程 {get_thread_id()} 视频片段: {idx} -> {get_relative_path(outfile)}"
+        )
 
         clip_files.append(outfile)
         if outfile.exists():
@@ -94,7 +96,9 @@ def extract_audio(clip_files: list[Path]) -> list[Path]:
         if audio_file.exists():
             continue
 
-        logger.success(f"线程 {get_thread_id()} 提取音频文件: {idx} -> {audio_file}")
+        logger.success(
+            f"线程 {get_thread_id()} 提取音频文件: {idx} -> {get_relative_path(audio_file)}"
+        )
 
         clip = VideoFileClip(video_file)
         clip.audio.write_audiofile(audio_file)
@@ -103,6 +107,9 @@ def extract_audio(clip_files: list[Path]) -> list[Path]:
 
 
 def process_video(product: Product) -> Product:
+
+    if product.status == "failed":
+        return product
 
     logger.success(f"线程 {get_thread_id()} 开始处理视频文件: {product.mp4_path}")
 
