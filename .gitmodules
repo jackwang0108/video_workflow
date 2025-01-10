@@ -1,0 +1,3 @@
+[submodule "workflows/subtitles_translator"]
+	path = workflows/subtitles_translator
+	url = git@github.com:jackwang0108/subtitles_translator.git
