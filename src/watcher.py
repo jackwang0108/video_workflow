@@ -74,10 +74,11 @@ class Watcher:
             new_tasks = self.get_tasks()
 
             if len(new_tasks) == 0:
+                sleep_time = 3600
                 logger.debug(
-                    f"没有新任务, 当前队列任务数 {task_queue.qsize()}, 10秒后重新检查..."
+                    f"没有新任务, 当前队列任务数 {task_queue.qsize()}, {sleep_time} 秒后重新检查..."
                 )
-                time.sleep(10)
+                time.sleep(sleep_time)
                 continue
 
             # 更新缓存
