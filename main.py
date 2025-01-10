@@ -28,6 +28,7 @@ from src.dispatcher import Dispatcher
 from workflows.bypy_download import download_dir
 from workflows.create_product import create_product
 from workflows.process_videos import process_video
+from workflows.extract_srt import extract_srt
 
 
 def print_data(data):
@@ -55,7 +56,14 @@ def main():
 
     close_event = threading.Event()
 
-    pipeline = Pipeline([create_product, download_dir, process_video])
+    pipeline = Pipeline(
+        [
+            create_product,
+            download_dir,
+            process_video,
+            extract_srt,
+        ]
+    )
 
     threads = [
         threading.Thread(
